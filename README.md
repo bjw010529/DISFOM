@@ -1,1 +1,1 @@
-Run 
+Run bash ./box_main.sh
