@@ -1,0 +1,6 @@
+data_process.ipynb
+
+*.pdf
+*.csv
+__pycache__
+*.pyc__pycache__/
