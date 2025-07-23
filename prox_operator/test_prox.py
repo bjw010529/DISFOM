@@ -55,7 +55,7 @@ def solve_tau(v, w, mu, rho, l, u, tol=1e-8):
 # 3.  exact nested μ–τ bisection
 # ===============================================================
 def prox_sqL1_box(v, rho, w, alpha, l, u,
-                  tau_tol=1e-8, mu_tol=1e-8, max_iter=100, tolc = 1e-4):
+                  tau_tol=1e-8, mu_tol=1e-8, max_iter=100, tolc = 1e-16):
     v, w, l, u = map(lambda a: np.asarray(a,float).ravel(), (v,w,l,u))
 
     mu_lo = 0.0
@@ -113,7 +113,7 @@ def proj_l1_ball(v, alpha):
 # 6.  ADMM solver
 # ===============================================================
 def admm_sqL1_box(v, rho, w, alpha, l, u,
-                  beta=1.0, max_iter=100000, tol=1e-4, log_every=100, thres = 0, max_ti = 0):
+                  beta=1.0, max_iter=100000, tol=1e-8, log_every=100, thres = 0, max_ti = 0, tolc = 1e-16):
     time_start = time.time()
     v, w, l, u = map(lambda a: np.asarray(a,float).ravel(), (v,w,l,u))
     x = np.clip(v, l, u)             # primal variables
@@ -150,7 +150,7 @@ def admm_sqL1_box(v, rho, w, alpha, l, u,
                      np.linalg.norm(y-y_old,np.inf))
         p = np.linalg.norm(y, 1) - alpha
         print(r, s, p)
-        if (p < tol and s < tol) and (r < tol) and F(z,v,rho) < thres:
+        if (np.linalg.norm(z - w, 1) < alpha + tolc and s < tol) and (r < tol) and F(z,v,rho) < thres:
             break
     return z
 
@@ -171,7 +171,7 @@ def run_one_trial(seed, d):
 
     # --- exact solver
     t0 = time.perf_counter()
-    x_ex, mu = prox_sqL1_box(v, rho, w, alpha, l, u, tolc=tol)
+    x_ex, mu = prox_sqL1_box(v, rho, w, alpha, l, u)
     t_ex = time.perf_counter() - t0
     F_ex = F(x_ex, v, rho)
     beta = 100+300*np.log2(d)
